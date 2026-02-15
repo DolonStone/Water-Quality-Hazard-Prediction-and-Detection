@@ -67,7 +67,7 @@ American Water Works Association — utility operations and treatment optimisati
 
 ## Stakeholder
 
-State Environmental Agencies, Watershed Managers, Conservation Authorities
+State Environmental Agencies, Conservation Authorities
 
 **Pain Points**
 
