@@ -18,7 +18,7 @@ Federal, state, and local agencies maintain separate monitoring networks with va
 - Pollution can drive up drinking water treatment costs significantly (U.S. EPA, 2023).
 - Broader ecological and economic impacts from nutrient pollution and eutrophication are estimated at billions annually (Dodds et al., 2009).
 
-# Steakholder Context 
+# Stakeholder Context 
 
 **Stakeholder**
 
@@ -33,7 +33,7 @@ Municipal Water Utility Directors and Operations Managers
 
 - Treatment optimisation is limited by lagged data (manual sampling + lab turnaround)
 
-  **Operational Consequences**
+**Operational Consequences**
 - Increased chemical usage and energy costs
 
 - Reduced ability to optimise treatment in real time
@@ -60,6 +60,7 @@ American Water Works Association — utility operations and treatment optimisati
 
 
 **Stakeholder**
+
 State Environmental Agencies, Watershed Managers, Conservation Authorities
 
 **Pain Points**
