@@ -10,7 +10,7 @@ Every year, industrial pollution, agricultural runoff, and natural events contam
 Most water quality monitoring relies on periodic sampling (e.g., weekly or monthly state programs), meaning rapid contamination events often go undetected until after people have been exposed.
 
 **Fragmented Data**
-Federal, state, and local agencies maintain separate monitoring networks with varying reporting frequencies, making real-time integration limited and pattern recognition difficult without custom data pipelines. (Supported by discussions of data silos in environmental research.)
+Federal, state, and local agencies maintain separate monitoring networks with varying reporting frequencies, making real-time integration limited and pattern recognition difficult without custom data pipelines.
 
 **Contamination Inflicts Substantial Economic Burden**
 - Waterborne diseases alone account for billions in healthcare costs annually (Collier et al., 2021).
