@@ -9,5 +9,7 @@ https://www.waterqualitydata.us/ - Historical Water Quality - Free Download - N/
 
 # Road Map
 -Basic data collection from USGS
+
 -Isolation Forest implementation
+
 -Streamlit dashboard prototype
