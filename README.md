@@ -1,6 +1,11 @@
 # Water-Quality-Hazard-Prediction-and-Detection
 
+# Project Overview
 A work-in-progress machine learning system that monitors river water quality in real-time and detects anomalies that could indicate environmental hazards. It combines multiple anomaly detection techniques to identify potential pollution events, algal blooms, or other water quality issues before they become critical.
+
+# Problem overview
+Every year, **industrial pollution, agricultural runoff, and natural events** contaminate rivers across the United States, threatening public health, damaging ecosystems, and costing billions in economic losses.
+
 
 # Data Sources - Description - Access - Frequency
 https://waterservices.usgs.gov/ - Real Time - Free API - 15 to 60 Minutes
