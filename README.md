@@ -19,8 +19,9 @@ Federal, state, and local agencies maintain separate monitoring networks with va
 - Broader ecological and economic impacts from nutrient pollution and eutrophication are estimated at billions annually (Dodds et al., 2009).
 
 # Stakeholder Context 
+Water contamination and delayed detection affect a broad set of stakeholders across the water and environmental ecosystem. Each group faces distinct operational risks, but all are constrained by limited real-time visibility and uncertainty.
 
-  **Stakeholder**
+## Stakeholder
 
 Municipal Water Utility Directors and Operations Managers
 
@@ -60,7 +61,11 @@ American Water Works Association — utility operations and treatment optimisati
 
 
 
-  **Stakeholder**
+
+
+
+
+## Stakeholder
 
 State Environmental Agencies, Watershed Managers, Conservation Authorities
 
