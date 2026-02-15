@@ -4,6 +4,7 @@ A work-in-progress machine learning system that monitors river water quality in 
 
 # Data Sources - Description - Access - Frequency
 https://waterservices.usgs.gov/ - Real Time - Free API - 15 to 60 Minutes
+
 https://www.waterqualitydata.us/ - Historical Water Quality - Free Download - N/A
 
 # Road Map
