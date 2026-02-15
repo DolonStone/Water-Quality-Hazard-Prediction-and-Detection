@@ -20,7 +20,7 @@ Federal, state, and local agencies maintain separate monitoring networks with va
 
 # Stakeholder Context 
 
-**Stakeholder**
+<u>**Stakeholder**</u>
 
 Municipal Water Utility Directors and Operations Managers
 
@@ -57,6 +57,7 @@ Municipal Water Utility Directors and Operations Managers
 U.S. Environmental Protection Agency — drinking water treatment and source water protection guidance
 
 American Water Works Association — utility operations and treatment optimisation literature
+
 
 
 **Stakeholder**
