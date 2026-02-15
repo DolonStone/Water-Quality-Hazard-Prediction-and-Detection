@@ -33,11 +33,65 @@ Municipal Water Utility Directors and Operations Managers
 
 - Treatment optimisation is limited by lagged data (manual sampling + lab turnaround)
 
+  **Operational Consequences**
+- Increased chemical usage and energy costs
+
+- Reduced ability to optimise treatment in real time
+
+- Higher operational stress during rapid water quality changes
+
+- Risk of either under-treatment (compliance violations) or over-treatment (unnecessary cost)
+
+**What They Need**
+
+- Real-time upstream water quality data (temperature, turbidity, nutrients, conductivity, etc.)
+
+- Early warning signals before degraded water reaches intake points
+
+- Predictive confidence to adjust treatment dynamically, not reactively
+
+- Automated data records to support regulatory reporting and audits
+
 **Supporting Sources**
 
 U.S. Environmental Protection Agency — drinking water treatment and source water protection guidance
 
-American Water Works Association — utility operations and treatment optimization literature
+American Water Works Association — utility operations and treatment optimisation literature
+
+
+**Stakeholder**
+State Environmental Agencies, Watershed Managers, Conservation Authorities
+
+**Pain Points**
+
+- Nutrient pollution and sediment runoff are episodic and spatially variable
+
+- Manual sampling often misses short-duration events (e.g., post-storm runoff)
+
+- Limited ability to assess cumulative or downstream impacts in real time
+
+**Operational Consequences**
+
+- Reactive enforcement and remediation
+
+- Difficulty evaluating the effectiveness of nutrient reduction programs
+
+- Delayed response to harmful algal bloom precursors
+
+**What They Need**
+
+- Continuous, high-frequency water quality signals
+
+- Early indicators of eutrophication and ecological stress
+
+
+
+
+
+
+
+
+
 
 # Data Sources - Description - Access - Frequency
 https://waterservices.usgs.gov/ - Real Time - Free API - 15 to 60 Minutes
