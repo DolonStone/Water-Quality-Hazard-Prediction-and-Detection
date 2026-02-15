@@ -6,7 +6,7 @@ A work-in-progress machine learning system that monitors river water quality in 
 # Problem overview
 Every year, industrial pollution, agricultural runoff, and natural events contaminate rivers across the United States, threatening public health, damaging ecosystems, and costing billions in economic losses.
 
-**Reactive, Not Proactive**
+**Reactive monitoring**
 Most water quality monitoring relies on periodic sampling (e.g., weekly or monthly state programs), meaning rapid contamination events often go undetected until after people have been exposed.
 
 **Fragmented Data**
