@@ -25,13 +25,13 @@ Federal, state, and local agencies maintain separate monitoring networks with va
 Municipal Water Utility Directors and Operations Managers
 
 **Pain Points**
-Drinking water utilities must ensure regulatory compliance under uncertainty about incoming source water quality
+- Drinking water utilities must ensure regulatory compliance under uncertainty about incoming source water quality
 
-To manage risk, utilities often apply conservative treatment strategies, including higher-than-necessary chemical dosing
+- To manage risk, utilities often apply conservative treatment strategies, including higher-than-necessary chemical dosing
 
-Sudden contamination events (e.g., nutrient spikes, turbidity increases, algal toxins) can force emergency treatment changes with little warning
+- Sudden contamination events (e.g., nutrient spikes, turbidity increases, algal toxins) can force emergency treatment changes with little warning
 
-Treatment optimisation is limited by lagged data (manual sampling + lab turnaround)
+- Treatment optimisation is limited by lagged data (manual sampling + lab turnaround)
 
 **Supporting Sources**
 
