@@ -45,7 +45,7 @@ Municipal Water Utility Directors and Operations Managers
 
 **What They Need**
 
-- Real-time upstream water quality data (temperature, turbidity, nutrients, conductivity, etc.)
+- Real-time upstream water quality data
 
 - Early warning signals before degraded water reaches intake points
 
