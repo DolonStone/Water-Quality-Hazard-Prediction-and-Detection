@@ -81,7 +81,7 @@ State Environmental Agencies, Conservation Authorities
 
 - Reactive enforcement and remediation
 
-- Difficulty evaluating the effectiveness of nutrient reduction programs
+- Difficulty evaluating the effectiveness of nutrient reduction programs (periodic sampling)
 
 - Delayed response to harmful algal bloom precursors
 
