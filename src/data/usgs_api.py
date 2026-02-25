@@ -13,12 +13,8 @@ from dataretrieval import waterdata
 import requests
 import pandas as pd
 
-from station_config import (
-    WATER_QUALITY_PARAMS,
-    PARAM_CODES,
-    USGS_API_BASE_URL,
-    SITE_SEARCH_PARAMS,
-)
+from .station_config import WATER_QUALITY_PARAMS,PARAM_CODES,USGS_API_BASE_URL,SITE_SEARCH_PARAMS
+
 
 
 def get_instantaneous_data(

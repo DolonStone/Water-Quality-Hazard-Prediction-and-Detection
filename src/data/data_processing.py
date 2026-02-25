@@ -1,6 +1,4 @@
-from usgs_api import get_instantaneous_data
-from usgs_api import get_historical_data
-from station_config import MONITORING_STATIONS, WATER_QUALITY_PARAMS
+from src.data.station_config import MONITORING_STATIONS, WATER_QUALITY_PARAMS
 import pandas as pd
 
 
@@ -55,6 +53,3 @@ def interpolate_missing_values(df, method='linear', limit_direction='both'):
     
     return df_interpolated
 
-df = get_instantaneous_data(site_id='USGS-07374000')
-df_formatted = format_data_for_modeling(df[0], df[1])
-print(df_formatted.head())
