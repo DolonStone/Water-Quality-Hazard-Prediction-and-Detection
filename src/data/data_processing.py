@@ -4,31 +4,34 @@ import pandas as pd
 
 def format_data_for_modeling(df, metadata):
     """
-    Format the retrieved data for machine learning modeling.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        DataFrame containing the retrieved water quality data.
-    metadata : dict
-        Dictionary containing metadata about the retrieved data.
-
-    Returns
-    -------
-    pd.DataFrame
-        Formatted DataFrame ready for modeling.
+    Format retrieved water quality data for anomaly detection.
     """
 
+    # Ensure timestamp is datetime
+    df["time"] = pd.to_datetime(df["time"], utc=True)
 
-    # Pivot to wide format: one column per parameter
-    df_wide = df.pivot(index='time', columns='parameter_code', values='value')
+    # Pivot to wide format
+    df_wide = df.pivot(
+        index="time",
+        columns="parameter_code",
+        values="value"
+    )
 
-    # Rename columns to human-readable names using metadata
+    # Rename parameters
     df_wide.columns = df_wide.columns.map(WATER_QUALITY_PARAMS)
+
+    # Sort timestamps
+    df_wide = df_wide.sort_index()
+
+    # Remove duplicate timestamps
+    df_wide = df_wide[~df_wide.index.duplicated(keep="first")]
+
+    # Force uniform 15-minute sampling
+    df_wide = df_wide.resample("15T").mean()
+
+    # Interpolate missing values
     df_clean = interpolate_missing_values(df_wide)
-    # Remove Rows with missing values
-    #required_cols = [col for col in df_wide.columns]
-    #df_clean = df_wide.dropna(subset=required_cols, how='any')
+
     return df_clean
 
 def interpolate_missing_values(df, method='linear', limit_direction='both'):
