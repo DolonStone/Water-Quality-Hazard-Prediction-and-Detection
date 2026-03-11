@@ -45,7 +45,6 @@ class WaterQualityAnomalyDetector:
             "doy": series.index.dayofyear
         })
 
-        # Require only ~2 weeks of data instead of 1 year
         min_required = 14 * 96
 
         if len(series) >= min_required:
@@ -53,12 +52,29 @@ class WaterQualityAnomalyDetector:
             pattern = df.groupby(["slot", "doy"])["value"].mean()
             pattern = pattern.unstack(level="doy")
 
-            # Smooth across days
-            pattern = pattern.T.rolling(
+            # Wrap edges before smoothing so boundary DOYs aren't under-averaged
+            pad = 15
+            cols = sorted(pattern.columns)
+            left_cols = cols[-pad:]   # last N DOYs of year
+            right_cols = cols[:pad]   # first N DOYs of year
+
+            left_pad = pattern[left_cols].copy()
+            left_pad.columns = [c - 365 for c in left_cols]   # shift to negative DOYs
+
+            right_pad = pattern[right_cols].copy()
+            right_pad.columns = [c + 365 for c in right_cols]  # shift past 365
+
+            padded = pd.concat([left_pad, pattern, right_pad], axis=1).sort_index(axis=1)
+
+            # Smooth across days on padded pattern
+            smoothed = padded.T.rolling(
                 window=7,
                 center=True,
                 min_periods=1
             ).mean().T
+
+            # Drop the padding columns, keep only real DOYs
+            pattern = smoothed[cols]
 
             # Smooth across time-of-day
             pattern = pattern.rolling(
@@ -102,6 +118,7 @@ class WaterQualityAnomalyDetector:
     # Expected value lookup
     # -------------------------------------------------------
 
+
     def _lookup_expected(self, param, index):
 
         pattern = self._patterns[param]
@@ -111,15 +128,36 @@ class WaterQualityAnomalyDetector:
 
         if isinstance(pattern, pd.DataFrame):
 
+            available_doys = np.array(pattern.columns)
+
             values = []
 
             for slot, doy in zip(slots, doys):
 
-                if doy in pattern.columns:
-                    values.append(pattern.loc[slot, doy])
+                # Find two nearest days
+                diffs = available_doys - doy
+
+                left_mask = diffs <= 0
+                right_mask = diffs >= 0
+
+                if left_mask.any():
+                    left_doy = available_doys[left_mask].max()
                 else:
-                    closest = pattern.columns[np.argmin(np.abs(pattern.columns - doy))]
-                    values.append(pattern.loc[slot, closest])
+                    left_doy = available_doys.min()
+
+                if right_mask.any():
+                    right_doy = available_doys[right_mask].min()
+                else:
+                    right_doy = available_doys.max()
+
+                v_left = pattern.loc[slot, left_doy]
+                v_right = pattern.loc[slot, right_doy]
+
+                if left_doy == right_doy:
+                    values.append(v_left)
+                else:
+                    w = (doy - left_doy) / (right_doy - left_doy)
+                    values.append(v_left * (1 - w) + v_right * w)
 
             return pd.Series(values, index=index)
 
@@ -189,7 +227,7 @@ class WaterQualityAnomalyDetector:
 
         expected_df = pd.DataFrame(expected_frames)
         residuals_df = pd.DataFrame(residual_frames)
-
+        
         X_scaled = self.scaler.transform(residuals_df.fillna(0))
 
         predictions = self.model.predict(X_scaled)

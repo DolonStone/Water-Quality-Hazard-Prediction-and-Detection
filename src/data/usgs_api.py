@@ -5,7 +5,7 @@ This module provides functions to query the USGS NWIS service for
 water quality and streamflow data from monitoring stations.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Tuple, Dict, Set, List
 from dataretrieval import waterdata
 
@@ -59,6 +59,12 @@ def get_instantaneous_data(
     elif isinstance(start_date, str):
         start_date = datetime.fromisoformat(start_date)
 
+    # Make dates timezone-aware (UTC) for comparison with API data
+    if start_date.tzinfo is None:
+        start_date = start_date.replace(tzinfo=timezone.utc)
+    if end_date.tzinfo is None:
+        end_date = end_date.replace(tzinfo=timezone.utc)
+
     # Format dates for API
     start_str = start_date.strftime('%Y-%m-%dT%H:%M')
     end_str = end_date.strftime('%Y-%m-%dT%H:%M')
@@ -70,6 +76,12 @@ def get_instantaneous_data(
     time=[start_str, end_str],
     )
 
+    # Explicitly filter to requested time range to ensure we only get the requested period
+    if 'time' in data.columns:
+        data['time'] = pd.to_datetime(data['time'], utc=True)
+        # Filter to the exact requested range
+        data = data[(data['time'] >= start_date) & (data['time'] <= end_date)]
+    
     return data, metadata
 
 
@@ -181,9 +193,16 @@ def get_historical_data(
         start_dt = datetime.strptime(end_date, '%Y-%m-%d') - timedelta(days=days_back)
         start_date = start_dt.strftime('%Y-%m-%d')
 
-    return get_instantaneous_data(
-        site_id=site_id,
-        param_codes=param_codes,
-        start_date=start_date,
-        end_date=end_date,
-    )
+    # For large historical date ranges, the USGS API may have limitations
+    # Try to fetch the data and handle potential issues
+    try:
+        return get_instantaneous_data(
+            site_id=site_id,
+            param_codes=param_codes,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    except Exception as e:
+        print(f"Warning: Error fetching historical data from {start_date} to {end_date}: {str(e)}")
+        # Return empty dataframe with metadata if fetch fails
+        return pd.DataFrame(), {}

@@ -85,6 +85,131 @@ State Environmental Agencies, Conservation Authorities
 
 - Delayed response to harmful algal bloom precursors
 
+---
+
+## 🚀 Using the Water Quality Anomaly Detection Dashboard
+
+The Streamlit dashboard provides a user-friendly interface for training anomaly detection models and monitoring water quality in real time.
+
+### Running the Dashboard
+
+```bash
+streamlit run dashboard.py
+```
+
+The dashboard will start and be available at `http://localhost:8501`
+
+### Dashboard Features
+
+#### 1. **Configuration Panel (Sidebar)**
+- **Select Monitoring Station**: Choose from configured USGS monitoring stations
+- **Model Training Settings**:
+  - Set training data date range (default: 2022-2024)
+  - Adjust contamination rate (expected proportion of anomalies, default: 5%)
+- **Current Data Period**: Select how many hours of recent data to display (1-72 hours)
+
+#### 2. **Model Training**
+Click the **"🔄 Train Model"** button to:
+- Fetch historical water quality data for the specified date range
+- Train a seasonal anomaly detector that learns normal patterns
+- Display training statistics and data summary
+
+**What the Model Does:**
+- Learns seasonal patterns for each water quality parameter (e.g., temperature, pH, dissolved oxygen)
+- Uses an Isolation Forest algorithm to detect anomalies based on residuals from expected seasonal values
+- Generates a baseline for what "normal" looks like
+
+#### 3. **Anomaly Analysis**
+Click the **"📈 Analyze Data"** button to:
+- Load real-time water quality data from the past 24 hours
+- Run anomaly detection using the trained model
+- Display interactive visualizations
+
+#### 4. **Visualizations**
+
+**Time Series Tab**:
+- Interactive line charts for each water quality parameter
+- Shows actual values (blue line), expected seasonal values (light blue background), and anomalies (red X markers)
+- Hover over points to see exact values and timestamps
+
+**Anomaly Scores Tab**:
+- Shows the anomaly detection confidence score for each time point
+- Red dashed line indicates the anomaly threshold
+- Higher positive scores = more likely to be normal; lower scores = anomalous
+
+**Parameter Comparison Tab**:
+- Bar chart comparing statistics (min, max, mean) across all parameters
+- Useful for identifying which parameters are within expected ranges
+
+**Anomaly Details Tab**:
+- Expandable items for each detected anomaly
+- Shows which parameters deviated most and their z-scores (how many standard deviations from expected)
+- Displays actual vs. expected values for context
+
+### Interpreting Results
+
+**Anomaly Score Interpretation:**
+- **Score > -0.5** (above threshold): Normal operation
+- **Score between -0.5 and -2.0**: Mild anomaly
+- **Score < -2.0**: Strong anomaly (high confidence)
+
+**Parameter Details:**
+When you expand an anomaly, you'll see:
+- **value**: Actual measured value
+- **expected**: What the model expected based on seasonal patterns
+- **deviation**: Difference between actual and expected (residual)
+- **z_score**: Standardized deviation (how many standard deviations from normal)
+
+### Example Workflow
+
+1. **Start Fresh**: Open the dashboard
+2. **Configure**: Select your monitoring station and set training years (2022-2024)
+3. **Train**: Click "Train Model" and wait for completion
+4. **Analyze**: Click "Analyze Data" to see today's water quality with anomalies highlighted
+5. **Investigate**: Click on anomalies to understand what deviated and by how much
+6. **Adjust**: If too many false positives, increase hours_back or decrease contamination rate
+
+### Model Performance Tips
+
+- **Better Training Data**: More years of historical data = more robust seasonal patterns
+- **Contamination Rate**: Lower values (e.g., 0.02) mean stricter anomaly detection; higher values (e.g., 0.10) are more lenient
+- **Parameters**: The model learns which parameters are most correlated and uses all of them together for context
+
+### Requirements
+
+- Python 3.8+
+- Streamlit 1.0+
+- pandas, sklearn, plotly
+- USGS dataretrieval library (for water quality data)
+- Internet connection (to fetch USGS data)
+
+### Troubleshooting
+
+**"No data available" error:**
+- Check internet connectivity
+- Verify the monitoring station ID is valid
+- The USGS API may have rate limits; try again later
+
+**"Model must be fitted first" error:**
+- Train the model before analyzing data (click "Train Model" first)
+
+**False Positives / Sudden Pattern Jumps:**
+- **Symptom**: Expected values suddenly jump, causing all recent data to appear as anomalies
+- **Causes**:
+  - Seasonal patterns have gaps or sparse data for recent day-of-year
+  - Training data doesn't cover all days of year uniformly
+  - Interpolation creates artifacts at pattern boundaries
+  
+- **Solutions**:
+  1. **Lower the contamination rate** to 0.01-0.02 (stricter detection reduces false positives)
+  2. **Use more recent training data** (e.g., 2025-2026) closer to current date
+  3. **Increase training span** (use 3-4 years of data for smoother patterns)
+  4. **Train on consistent periods** (avoid years with extreme events that skew patterns)
+
+**Slow startup:**
+- Large date ranges can take time to fetch and process
+- Try reducing the training date range initially
+
 **What They Need**
 
 - Continuous, high-frequency water quality signals
