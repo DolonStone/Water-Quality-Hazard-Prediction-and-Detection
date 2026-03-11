@@ -150,14 +150,25 @@ class WaterQualityAnomalyDetector:
                 else:
                     right_doy = available_doys.max()
 
+                # Ensure slot is in the index
+                if slot not in pattern.index:
+                    # Use nearest slot if exact slot not found
+                    slot = pattern.index[abs(pattern.index - slot).argmin()]
+                
                 v_left = pattern.loc[slot, left_doy]
                 v_right = pattern.loc[slot, right_doy]
+                
+                # Convert to scalars if they're Series
+                if isinstance(v_left, pd.Series):
+                    v_left = v_left.iloc[0] if len(v_left) > 0 else np.nan
+                if isinstance(v_right, pd.Series):
+                    v_right = v_right.iloc[0] if len(v_right) > 0 else np.nan
 
                 if left_doy == right_doy:
-                    values.append(v_left)
+                    values.append(float(v_left))
                 else:
                     w = (doy - left_doy) / (right_doy - left_doy)
-                    values.append(v_left * (1 - w) + v_right * w)
+                    values.append(float(v_left * (1 - w) + v_right * w))
 
             return pd.Series(values, index=index)
 
@@ -187,17 +198,24 @@ class WaterQualityAnomalyDetector:
 
             self._patterns[param] = pattern
 
-            expected = self._lookup_expected(param, series.index)
-
-            residual_frames[param] = series - expected
+            try:
+                expected = self._lookup_expected(param, series.index)
+                residual_frames[param] = series - expected
+            except Exception as e:
+                print(f"Warning: Error looking up expected values for {param}: {e}")
+                # Skip this parameter if lookup fails
+                continue
 
         residuals_df = pd.DataFrame(residual_frames).dropna()
+
+        if len(residuals_df) == 0:
+            raise ValueError("No valid residuals computed - check data quality")
 
         X_scaled = self.scaler.fit_transform(residuals_df)
 
         self.model.fit(X_scaled)
 
-        self.feature_names = df.columns.tolist()
+        self.feature_names = list(residuals_df.columns)
 
         self._residual_mean = residuals_df.mean()
         self._residual_std = residuals_df.std().replace(0, 1)

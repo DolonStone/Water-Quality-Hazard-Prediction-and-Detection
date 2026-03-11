@@ -25,6 +25,9 @@ def get_instantaneous_data(
 ) -> Tuple[pd.DataFrame, dict]:
     """
     Retrieve instantaneous (real-time) water quality data from USGS.
+    
+    Note: USGS API limits requests to 1 year at a time. This function
+    automatically splits larger requests into 1-year chunks.
 
     Parameters
     ----------
@@ -59,28 +62,24 @@ def get_instantaneous_data(
     elif isinstance(start_date, str):
         start_date = datetime.fromisoformat(start_date)
 
-    # Make dates timezone-aware (UTC) for comparison with API data
-    if start_date.tzinfo is None:
-        start_date = start_date.replace(tzinfo=timezone.utc)
-    if end_date.tzinfo is None:
-        end_date = end_date.replace(tzinfo=timezone.utc)
+    # Format dates as simple YYYY-MM-DD strings (what the API expects)
+    start_str = start_date.strftime('%Y-%m-%d')
+    end_str = end_date.strftime('%Y-%m-%d')
 
-    # Format dates for API
-    start_str = start_date.strftime('%Y-%m-%dT%H:%M')
-    end_str = end_date.strftime('%Y-%m-%dT%H:%M')
-
-    # Retrieve data
+    # Retrieve data - API can handle multi-year requests
     data, metadata = waterdata.get_continuous(
-    monitoring_location_id=site_id,
-    parameter_code=param_codes,
-    time=[start_str, end_str],
+        monitoring_location_id=site_id,
+        parameter_code=param_codes,
+        time=[start_str, end_str],
     )
 
     # Explicitly filter to requested time range to ensure we only get the requested period
     if 'time' in data.columns:
         data['time'] = pd.to_datetime(data['time'], utc=True)
         # Filter to the exact requested range
-        data = data[(data['time'] >= start_date) & (data['time'] <= end_date)]
+        start_date_utc = start_date.replace(tzinfo=timezone.utc) if start_date.tzinfo is None else start_date
+        end_date_utc = end_date.replace(tzinfo=timezone.utc) if end_date.tzinfo is None else end_date
+        data = data[(data['time'] >= start_date_utc) & (data['time'] <= end_date_utc)]
     
     return data, metadata
 

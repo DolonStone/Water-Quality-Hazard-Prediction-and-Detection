@@ -409,7 +409,7 @@ with st.sidebar:
     hours_back = st.slider(
         "Hours of Recent Data to Display",
         min_value=1,
-        max_value=8760,
+        max_value=8760*5,
         value=24,
         step=1,
     )
