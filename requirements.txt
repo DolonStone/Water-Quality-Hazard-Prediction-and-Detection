@@ -3,3 +3,8 @@ plotly
 pandas
 numpy
 joblib
+scikit-learn
+dataretrieval
+requests
+matplotlib
+seaborn
