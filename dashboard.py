@@ -617,7 +617,7 @@ elif analyze_clicked and state["model_trained"]:
                 st.metric("Normal Records", normal_count)
 
             with col2:
-                st.metric("Anomalies Detected", anomalies_count, delta=f"{anomaly_pct:.1f}%")
+                st.metric("Anomalies Detected", anomalies_count)
 
             with col3:
                 st.metric("Average Score", f"{scores.mean():.3f}")
