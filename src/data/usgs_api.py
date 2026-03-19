@@ -26,8 +26,8 @@ def get_instantaneous_data(
     """
     Retrieve instantaneous (real-time) water quality data from USGS.
     
-    Note: USGS API limits requests to 1 year at a time. This function
-    automatically splits larger requests into 1-year chunks.
+    Note: USGS API limits requests to 2 years at a time. This function
+    automatically splits larger requests into 2-year chunks.
 
     Parameters
     ----------
@@ -66,12 +66,42 @@ def get_instantaneous_data(
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = end_date.strftime('%Y-%m-%d')
 
-    # Retrieve data - API can handle multi-year requests
-    data, metadata = waterdata.get_continuous(
-        monitoring_location_id=site_id,
-        parameter_code=param_codes,
-        time=[start_str, end_str],
-    )
+    # Check if request spans more than 2 years (730 days)
+    start_dt = datetime.strptime(start_str, '%Y-%m-%d')
+    end_dt = datetime.strptime(end_str, '%Y-%m-%d')
+    days = (end_dt - start_dt).days
+
+    if days > 730:
+        # Split into 2-year chunks
+        chunks = []
+        current_start = start_dt
+        while current_start < end_dt:
+            current_end = min(current_start + timedelta(days=730), end_dt)
+            chunks.append((current_start.strftime('%Y-%m-%d'), current_end.strftime('%Y-%m-%d')))
+            current_start = current_end
+
+        # Fetch data for each chunk
+        all_data = []
+        for chunk_start, chunk_end in chunks:
+            data_chunk, metadata = waterdata.get_continuous(
+                monitoring_location_id=site_id,
+                parameter_code=param_codes,
+                time=[chunk_start, chunk_end],
+            )
+            all_data.append(data_chunk)
+
+        # Concatenate all chunks
+        data = pd.concat(all_data, ignore_index=True)
+        # Remove duplicates that may occur at chunk boundaries
+        data = data.drop_duplicates(subset=['time', 'parameter_code'], keep='first')
+        # Use metadata from the last chunk
+    else:
+        # Retrieve data - API can handle up to 2-year requests
+        data, metadata = waterdata.get_continuous(
+            monitoring_location_id=site_id,
+            parameter_code=param_codes,
+            time=[start_str, end_str],
+        )
 
     # Explicitly filter to requested time range to ensure we only get the requested period
     if 'time' in data.columns:

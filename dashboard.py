@@ -3,7 +3,7 @@ Water Quality Anomaly Detection Dashboard
 
 A Streamlit dashboard that:
 1. Trains a random forest anomaly detector on historical data (2022-2024)
-2. Displays water quality data from the past 24 hours
+2. Displays water quality data for a selected date range
 3. Identifies and visualizes anomalies using the trained model
 """
 
@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import tempfile
 import os
 from pathlib import Path
+import joblib
 
 # Add src to path
 import sys
@@ -133,13 +134,26 @@ def load_historical_data(site_id: str, start_year: int = 2025, end_year: int = 2
             return None
 
 
-def load_current_data(site_id: str, hours: int = 24) -> pd.DataFrame:
-    """Load current water quality data from the past N hours."""
-    with st.spinner(f"Loading data from the past {hours} hours..."):
-        try:
-            end_date = datetime.now()
-            start_date = end_date - timedelta(hours=hours)
+def load_current_data(site_id: str, start_date: datetime = None, end_date: datetime = None) -> pd.DataFrame:
+    """Load current water quality data for the specified date range."""
 
+    if end_date is None:
+        end_date = datetime.now()
+    if start_date is None:
+        start_date = end_date - timedelta(hours=24)
+
+    # Normalize inputs to datetime
+    if not isinstance(start_date, datetime):
+        start_date = datetime.combine(start_date, datetime.min.time())
+    if not isinstance(end_date, datetime):
+        end_date = datetime.combine(end_date, datetime.max.time())
+
+    if start_date > end_date:
+        st.error("Start date must be before or equal to end date.")
+        return None
+
+    with st.spinner(f"Loading data from {start_date} to {end_date}..."):
+        try:
             data, metadata = get_instantaneous_data(
                 site_id=site_id,
                 start_date=start_date.isoformat(),
@@ -153,7 +167,9 @@ def load_current_data(site_id: str, hours: int = 24) -> pd.DataFrame:
             df_formatted = format_data_for_modeling(data, metadata)
 
             if len(df_formatted) == 0:
-                st.warning(f"No data available for the past {hours} hours.")
+                st.warning(
+                    f"No data available between {start_date.strftime('%Y-%m-%d %H:%M')} "
+                    f"and {end_date.strftime('%Y-%m-%d %H:%M')}.")
                 return None
 
             # Remove any completely empty columns
@@ -262,7 +278,7 @@ def create_timeseries_plot(param_name: str) -> go.Figure:
         )
 
     fig.update_layout(
-        title=f"{param_name} - Last 24 Hours",
+        title=f"{param_name} - Selected Date Range",
         xaxis_title="Time",
         yaxis_title=param_name,
         hovermode="x unified",
@@ -307,7 +323,7 @@ def create_anomaly_score_plot() -> go.Figure:
     )
 
     fig.update_layout(
-        title="Anomaly Scores - Last 24 Hours",
+        title="Anomaly Scores - Selected Date Range",
         xaxis_title="Time",
         yaxis_title="Anomaly Score",
         hovermode="x unified",
@@ -350,13 +366,53 @@ def create_parameter_comparison_plot() -> go.Figure:
         x="Parameter",
         y=["Min", "Max", "Mean"],
         barmode="group",
-        title="Parameter Statistics - Last 24 Hours",
+        title="Parameter Statistics - Selected Date Range",
         labels={"value": "Value", "variable": "Statistic"},
         height=400,
     )
 
     fig.update_layout(template="plotly_white", hovermode="x unified")
     return fig
+
+
+def save_model(model, training_data, start_year, end_year):
+    """Save the trained model with metadata."""
+    try:
+        models_dir = Path(__file__).parent / "saved_models"
+        models_dir.mkdir(exist_ok=True)
+        filename = f"model_{start_year}_{end_year}.pkl"
+        data = {
+            "model": model,
+            "training_data": training_data,
+            "start_year": start_year,
+            "end_year": end_year,
+            "trained_at": datetime.now()
+        }
+        joblib.dump(data, models_dir / filename)
+        st.success(f"Model saved as {filename}")
+        # Refresh the list
+        st.rerun()
+    except Exception as e:
+        st.error(f"Error saving model: {str(e)}")
+
+
+def load_model(filename):
+    """Load a saved model."""
+    try:
+        models_dir = Path(__file__).parent / "saved_models"
+        data = joblib.load(models_dir / filename)
+        return data
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
+
+
+def list_saved_models():
+    """List available saved models."""
+    models_dir = Path(__file__).parent / "saved_models"
+    if not models_dir.exists():
+        return []
+    return [f.stem for f in models_dir.glob("*.pkl")]
 
 
 # ============================================================================
@@ -406,13 +462,52 @@ with st.sidebar:
 
     # Current data period
     st.subheader("📊 Current Data")
-    hours_back = st.slider(
-        "Hours of Recent Data to Display",
-        min_value=1,
-        max_value=8760*5,
-        value=24,
-        step=1,
+    default_end = datetime.now().date()
+    default_start = default_end - timedelta(days=1)
+
+    date_range = st.date_input(
+        "Select Date Range",
+        value=(default_start, default_end),
+        min_value=datetime(2015, 1, 1).date(),
+        max_value=datetime.now().date(),
     )
+
+    # Ensure we always have a start and end date
+    if isinstance(date_range, tuple):
+        start_date, end_date = date_range
+    else:
+        start_date = end_date = date_range
+
+    # Convert to datetime for API
+    start_datetime = datetime.combine(start_date, datetime.min.time())
+    end_datetime = datetime.combine(end_date, datetime.max.time())
+
+    if start_datetime > end_datetime:
+        st.error("Start date must be before or equal to end date.")
+        st.stop()
+
+    st.divider()
+
+    # Load saved model
+    st.subheader("📁 Load Saved Model")
+    saved_models = list_saved_models()
+    if saved_models:
+        selected_model = st.selectbox(
+            "Select Saved Model",
+            options=saved_models,
+            format_func=lambda x: x.replace("model_", "").replace("_", "-"),
+        )
+        load_clicked = st.button("📂 Load Model", use_container_width=True)
+        if load_clicked:
+            data = load_model(selected_model + ".pkl")
+            if data:
+                state["model"] = data["model"]
+                state["training_data"] = data.get("training_data")
+                state["model_trained"] = True
+                st.success(f"✓ Loaded model trained from {data['start_year']} to {data['end_year']} at {data['trained_at'].strftime('%Y-%m-%d %H:%M')}")
+                st.rerun()
+    else:
+        st.info("No saved models found.")
 
     st.divider()
 
@@ -485,13 +580,24 @@ if train_clicked:
 
             st.success("✓ Model is ready for anomaly detection!")
 
+# Save model option (always available if model is trained)
+if state["model_trained"]:
+    col_save, _ = st.columns([1, 3])
+    with col_save:
+        if st.button("💾 Save Model", use_container_width=True):
+            save_model(state["model"], state.get("training_data"), training_start_year, training_end_year)
+
 # TAB 2: ANALYSIS
 if analyze_clicked and not state["model_trained"]:
     st.warning("⚠️ Please train the model first using the 'Train Model' button.")
 
 elif analyze_clicked and state["model_trained"]:
     # Load current data
-    df_current = load_current_data(selected_station, hours=hours_back)
+    df_current = load_current_data(
+        selected_station,
+        start_date=start_datetime,
+        end_date=end_datetime,
+    )
 
     if df_current is not None:
         # Predict anomalies

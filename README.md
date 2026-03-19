@@ -106,7 +106,7 @@ The dashboard will start and be available at `http://localhost:8501`
 - **Model Training Settings**:
   - Set training data date range (default: 2022-2024)
   - Adjust contamination rate (expected proportion of anomalies, default: 5%)
-- **Current Data Period**: Select how many hours of recent data to display (1-72 hours)
+- **Current Data Period**: Select a date range to display (start and end dates)
 
 #### 2. **Model Training**
 Click the **"🔄 Train Model"** button to:
@@ -121,7 +121,7 @@ Click the **"🔄 Train Model"** button to:
 
 #### 3. **Anomaly Analysis**
 Click the **"📈 Analyze Data"** button to:
-- Load real-time water quality data from the past 24 hours
+- Load water quality data for the selected date range
 - Run anomaly detection using the trained model
 - Display interactive visualizations
 
@@ -165,9 +165,9 @@ When you expand an anomaly, you'll see:
 1. **Start Fresh**: Open the dashboard
 2. **Configure**: Select your monitoring station and set training years (2022-2024)
 3. **Train**: Click "Train Model" and wait for completion
-4. **Analyze**: Click "Analyze Data" to see today's water quality with anomalies highlighted
+4. **Analyze**: Click "Analyze Data" to see water quality over the selected date range with anomalies highlighted
 5. **Investigate**: Click on anomalies to understand what deviated and by how much
-6. **Adjust**: If too many false positives, increase hours_back or decrease contamination rate
+6. **Adjust**: If too many false positives, adjust the date range or decrease the contamination rate
 
 ### Model Performance Tips
 
